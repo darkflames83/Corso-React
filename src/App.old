@@ -1,0 +1,185 @@
+import { useState, useEffect, useReducer, useContext } from "react";
+import reactLogo from "./assets/react.svg";
+import viteLogo from "/vite.svg";
+import "./App.css";
+import Card from "./components/Card";
+import CardForm from "./components/CardForm";
+import Example from "./components/Example";
+import { ProvaContext } from "./components/stores/ProvaContext";
+
+function formReducer(state, action) {
+  switch (action.type) {
+    case "CHANGE_FIELD":
+      return { ...state, [action.field]: action.value };
+    case "RESET_FORM":
+      return { name: "", email: "" };
+    default:
+      return state;
+  }
+}
+
+function App() {
+  const [count, setCount] = useState(0);
+  const [items, setItems] = useState([1, 2, 3]);
+  console.log(items);
+
+  const [data, setData] = useState([]);
+  const [formState, dispatchFormState] = useReducer(formReducer, {
+    name: "",
+    email: "",
+  });
+
+  const handleFieldChange = (field, value) => {
+    dispatchFormState({ type: "CHANGE_FIELD", field, value });
+  };
+
+  const resetForm = (e) => {
+    e.preventDefault();
+    dispatchFormState({ type: "RESET_FORM" });
+  };
+  const sendForm = (e) => {
+    e.preventDefault();
+    console.log(formState);
+  };
+
+  const aggiungiItems = () => {
+    const nuovoItem = 4;
+    setItems([...items, nuovoItem]);
+    console.log(items);
+  };
+
+  const [cities, setCities] = useState([
+    {
+      id: 0,
+      title: "Tokyo",
+      description:
+        "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Tempore, vitae.",
+      imgUrl:
+        "https://plus.unsplash.com/premium_photo-1661914240950-b0124f20a5c1?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      isVisited: true,
+    },
+    {
+      id: 1,
+      title: "New York",
+      description:
+        "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Tempore, vitae.",
+      imgUrl:
+        "https://plus.unsplash.com/premium_photo-1714051660720-888e8454a021?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      isVisited: false,
+    },
+    {
+      id: 2,
+      title: "Roma",
+      description:
+        "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Tempore, vitae.",
+      imgUrl:
+        "https://plus.unsplash.com/premium_photo-1675975706513-9daba0ec12a8?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      isVisited: true,
+    },
+    {
+      id: 3,
+      title: "Parigi",
+      description:
+        "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Tempore, vitae.",
+      imgUrl:
+        "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=1746&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      isVisited: false,
+    },
+  ]);
+
+  const addCity = (city) => {
+    setCities([...cities, city]);
+  };
+
+  useEffect(() => {
+    fetch("https://jsonplaceholder.typicode.com/posts")
+      .then((response) => response.json())
+      .then((data) => {
+        setData(data), console.log(data);
+      });
+  }, []);
+
+  return (
+    <ProvaContext.Provider value={{ count, setCount }}>
+      <Example cities={cities}></Example>
+      <CardForm addCity={addCity}></CardForm>
+      <div className="grid grid-cols-4 gap-5">
+        {cities.map((city) => (
+          <Card
+            key={city.id}
+            title={city.title}
+            isVisited={city.isVisited}
+            imgUrl={city.imgUrl}
+          >
+            {city.description}
+          </Card>
+        ))}
+      </div>
+
+      {/* Stampa di un JSON */}
+
+      {/* <div className="grid grid-cols-4 gap-5 mt-6">
+        {data.map((item) => (
+          <div key={item.id} className="bg-blue-200 rounded-lg p-3">
+            <p className="text-red-500 mb-1">User ID: {item.userId}</p>
+            <h2 className="text-xl mb-3">{item.title}</h2>
+            <p className="text-gray-800">{item.body}</p>
+          </div>
+        ))}
+      </div> */}
+
+      {/* 
+      <div className="grid grid-cols-4 gap-5 mt-3.5">
+        {cities
+          .filter((city) => !city.isVisited)
+          .map((city) => (
+            <Card
+              key={city.id}
+              title={city.title}
+              isVisited={city.isVisited}
+              imgUrl={city.imgUrl}
+            >
+              {city.description}
+            </Card>
+          ))}
+      </div> */}
+
+      <form>
+        <div>
+          <label htmlFor="name">Nome: </label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            value={formState.name}
+            onChange={(e) => handleFieldChange("name", e.target.value)}
+          />
+        </div>
+        <div>
+          <label htmlFor="name">EMail: </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value={formState.email}
+            onChange={(e) => handleFieldChange("email", e.target.value)}
+          />
+        </div>
+        <button onClick={resetForm}>Reset</button>
+        <button onClick={sendForm}>Invia</button>
+      </form>
+
+      <div className="card">
+        <button onClick={() => setCount((count) => count + 1)}>
+          count is {count}
+        </button>
+        <button onClick={aggiungiItems}>Prova</button>
+        <p>
+          Edit <code>src/App.jsx</code> and save to test HMR
+        </p>
+      </div>
+    </ProvaContext.Provider>
+  );
+}
+
+export default App;
