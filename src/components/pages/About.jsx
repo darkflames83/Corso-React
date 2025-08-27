@@ -1,13 +1,21 @@
+import { useEffect, useState } from "react";
 import Navbar from "../Navbar";
-import { neon } from "@netlify/neon";
-const nome = "New York";
-const sql = neon(); // automatically uses env NETLIFY_DATABASE_URL
-const [post] = await sql`SELECT * FROM Citta WHERE id = ${nome}`;
 
 function About() {
+  const [cities, setCities] = useState([]);
+
+  useEffect(() => {
+    fetch("/.netlify/functions/getCities")
+      .then((res) => res.json())
+      .then((data) => setCities(data));
+  }, []);
+
   return (
     <>
-      <Navbar></Navbar>
+      <Navbar />
+      {cities.map((city) => (
+        <p key={city.id}>{city.nome}</p>
+      ))}
       <h1 className="text-3xl font-bold">Pagina About!</h1>
     </>
   );
